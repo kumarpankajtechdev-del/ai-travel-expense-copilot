@@ -1,0 +1,4 @@
+{"event_type":"claim_submitted","claim_id":"CLM-1001","employee_grade":"L4","expense_type":"hotel","amount":4200,"currency":"INR","city":"Mumbai"}
+{"event_type":"claim_approved","claim_id":"CLM-1001","risk_score":0.12,"approved_by":"ai_copilot"}
+{"event_type":"claim_submitted","claim_id":"CLM-1002","employee_grade":"L3","expense_type":"hotel","amount":6200,"currency":"INR","city":"Delhi"}
+{"event_type":"claim_review_required","claim_id":"CLM-1002","risk_score":0.75,"reason":"amount_exceeds_limit"}
