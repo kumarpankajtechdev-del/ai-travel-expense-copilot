@@ -1,0 +1,12 @@
+.git
+.venv
+.env
+.tripledger
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+dist
+build
+tests
+*.egg-info

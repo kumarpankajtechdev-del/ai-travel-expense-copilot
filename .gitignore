@@ -1,0 +1,14 @@
+.venv/
+.env
+.tripledger/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+dist/
+build/
+*.sqlite3*
+.DS_Store
+node_modules/
+pytest-of-root/
