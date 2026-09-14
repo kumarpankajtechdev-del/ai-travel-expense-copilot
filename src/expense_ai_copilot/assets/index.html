@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="TripLedger, a personal travel budget and receipt copilot."
+    />
+    <title>TripLedger · Personal travel copilot</title>
+    <link rel="stylesheet" href="/assets/style.css" />
+    <script defer src="/assets/app.js"></script>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/"
+        >Trip<span>Ledger</span><small>PERSONAL TRAVEL COPILOT</small></a
+      ><span id="mode" class="pill">Loading…</span>
+    </header>
+    <main>
+      <section class="hero">
+        <div>
+          <p class="eyebrow">LESS ADMIN. MORE EXPLORING.</p>
+          <h1>Your trip, in perspective.</h1>
+          <p>
+            Turn receipts into a clear picture of your spending.<br />Review
+            every expense before it joins your ledger.
+          </p>
+        </div>
+        <div class="trip-picker">
+          <label for="trip">YOUR TRIP</label
+          ><select id="trip"></select
+          ><button id="new-trip" class="quiet">+ Create a trip</button>
+        </div>
+      </section>
+      <p id="notice" role="status" aria-live="polite"></p>
+      <section id="create-panel" class="card" hidden>
+        <h2>Plan a personal trip</h2>
+        <form id="create-form">
+          <div class="fields">
+            <label
+              >Trip name<input
+                name="title"
+                required
+                minlength="2"
+                maxlength="100"
+                placeholder="A weekend in Edinburgh"
+            /></label>
+            <label
+              >City<input
+                name="city"
+                required
+                minlength="2"
+                maxlength="80"
+                placeholder="Edinburgh"
+            /></label>
+            <label
+              >Currency<select name="currency">
+                <option>GBP</option>
+                <option>EUR</option>
+                <option>USD</option>
+                <option>INR</option>
+              </select></label
+            >
+            <label
+              >Start date<input name="start_date" type="date" required /></label
+            ><label
+              >End date<input name="end_date" type="date" required
+            /></label>
+            <label
+              >Total budget<input
+                name="budget"
+                type="number"
+                min=".01"
+                max="999999"
+                step=".01"
+                value="650"
+                required
+            /></label>
+            <label
+              >Hotel / night<input
+                name="hotel_nightly_limit"
+                type="number"
+                min=".01"
+                max="999999"
+                step=".01"
+                value="180"
+                required
+            /></label>
+            <label
+              >Meals / day<input
+                name="meal_daily_limit"
+                type="number"
+                min=".01"
+                max="999999"
+                step=".01"
+                value="60"
+                required
+            /></label>
+          </div>
+          <button>Create trip</button>
+        </form>
+      </section>
+      <section class="metrics" aria-label="Trip overview">
+        <article>
+          <span>TRIP BUDGET</span><strong id="budget">—</strong>
+        </article>
+        <article>
+          <span>CONFIRMED SPENDING</span><strong id="spent">—</strong>
+        </article>
+        <article>
+          <span>REMAINING</span><strong id="remaining">—</strong>
+        </article>
+      </section>
+      <p id="trip-context" class="subtle"></p>
+      <div class="workspace">
+        <section class="card receipt-card">
+          <p class="eyebrow">01 / CAPTURE</p>
+          <h2>A receipt, without the admin.</h2>
+          <p>Paste receipt text. Check the extracted details, then save.</p>
+          <div class="examples">
+            <span>Try a fictional receipt:</span
+            ><button class="chip" data-sample="meal">Dinner</button
+            ><button class="chip" data-sample="hotel">Hotel over budget</button
+            ><button class="chip" data-sample="ambiguous">Missing total</button>
+          </div>
+          <form id="receipt-form">
+            <label for="receipt-text">Receipt text</label
+            ><textarea
+              id="receipt-text"
+              rows="7"
+              maxlength="12000"
+              required
+              placeholder="Harbour Café&#10;2026-08-16&#10;Dinner&#10;Total: GBP 32.50"
+            ></textarea
+            ><button type="submit">
+              Review receipt <span aria-hidden="true">→</span>
+            </button>
+          </form>
+          <div id="draft-list"></div>
+          <form id="review-form" hidden>
+            <hr />
+            <h3>Check the details</h3>
+            <p id="review-status"></p>
+            <div id="review-messages"></div>
+            <div class="fields">
+              <label
+                >Merchant<input name="vendor" maxlength="120" required /></label
+              ><label
+                >Amount<input
+                  name="amount"
+                  type="number"
+                  min=".01"
+                  max="999999"
+                  step=".01"
+                  required
+              /></label>
+              <label
+                >Currency<select name="currency" required>
+                  <option value="">Choose</option>
+                  <option>GBP</option>
+                  <option>EUR</option>
+                  <option>USD</option>
+                  <option>INR</option>
+                </select></label
+              >
+              <label>Date<input name="date" type="date" required /></label
+              ><label
+                >Category<select name="category" required>
+                  <option value="">Choose</option>
+                  <option value="hotel">Hotel</option>
+                  <option value="meal">Meal</option>
+                  <option value="transport">Transport</option>
+                  <option value="flight">Flight</option>
+                  <option value="activity">Activity</option>
+                  <option value="other">Other</option>
+                </select></label
+              >
+              <label
+                >Hotel nights (otherwise 1)<input
+                  name="units"
+                  type="number"
+                  min="1"
+                  max="60"
+                  value="1"
+                  required
+              /></label>
+            </div>
+            <label class="check"
+              ><input type="checkbox" name="acknowledge_warnings" />I have
+              checked these details and accept any budget overruns.</label
+            >
+            <div class="actions">
+              <button type="submit">Confirm &amp; save</button
+              ><button type="button" class="quiet" id="discard">
+                Discard draft
+              </button>
+            </div>
+            <details>
+              <summary>How this review was made</summary>
+              <pre id="review-trace"></pre>
+            </details>
+          </form>
+        </section>
+        <section class="card analytics-card">
+          <p class="eyebrow">02 / EXPLORE</p>
+          <h2>Ask about your spending.</h2>
+          <p>Choose a question, then change the view and filters.</p>
+          <div class="examples">
+            <button class="chip" data-question="Show spending by category">
+              By category</button
+            ><button class="chip" data-question="Daily spending trend">
+              Daily trend</button
+            ><button class="chip" data-question="Top merchants">
+              Merchants
+            </button>
+          </div>
+          <form id="analytics-form">
+            <label for="question">Your question</label
+            ><input
+              id="question"
+              required
+              value="Show spending by category"
+              maxlength="1000"
+            />
+            <div class="fields">
+              <label
+                >View<select id="chart">
+                  <option value="auto">Suggested</option>
+                  <option value="bar">Bar</option>
+                  <option value="line">Line</option>
+                  <option value="donut">Donut</option>
+                  <option value="table">Table</option>
+                </select></label
+              >
+              <label
+                >Category<select id="category">
+                  <option value="">All categories</option>
+                  <option>hotel</option>
+                  <option>meal</option>
+                  <option>transport</option>
+                  <option>flight</option>
+                  <option>activity</option>
+                  <option>other</option>
+                </select></label
+              ><label>From<input id="from" type="date" /></label
+              ><label>To<input id="to" type="date" /></label>
+            </div>
+            <button type="submit">Explore spending</button>
+          </form>
+          <div id="chart-area" aria-live="polite"></div>
+          <div class="table-wrap"><table id="analytics-table"></table></div>
+          <p id="chart-note" class="subtle"></p>
+          <details>
+            <summary>Inspect the query plan</summary>
+            <pre id="query-trace"></pre>
+          </details>
+        </section>
+      </div>
+      <section class="card rules-card">
+        <div>
+          <p class="eyebrow">03 / STAY ON TRACK</p>
+          <h2>Your budget, explained.</h2>
+          <p>Answers grounded in this trip's personal rules, with sources.</p>
+        </div>
+        <div>
+          <form id="rules-form">
+            <label for="rules-question">Ask a budget question</label>
+            <div class="ask-row">
+              <input
+                id="rules-question"
+                maxlength="1000"
+                required
+                value="What is my daily meal budget?"
+              /><button>Ask</button>
+            </div>
+          </form>
+          <p id="rules-answer"></p>
+          <div id="sources"></div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">THE DETAILS</p>
+            <h2>Expense ledger</h2>
+          </div>
+          <a id="export" class="text-link" href="#">Download CSV ↗</a>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Merchant</th>
+                <th>Category</th>
+                <th class="number">Amount</th>
+              </tr>
+            </thead>
+            <tbody id="ledger"></tbody>
+          </table>
+        </div>
+        <details>
+          <summary>Activity history</summary>
+          <button class="quiet" id="load-events">Load activity</button>
+          <pre id="events"></pre>
+        </details>
+      </section>
+      <footer>
+        Independent portfolio project by Pankaj Kumar. The example trip and
+        receipts are fictional.<br /><span id="mode-note"
+          >Offline demo: deterministic extraction and supported question
+          templates.</span
+        >
+      </footer>
+    </main>
+  </body>
+</html>
